@@ -1,6 +1,7 @@
 # Fortified Lookouts
 
 ⚠️ IMPORTANT WARNING ABOUT ENABLING THE LARGER LOOKOUT MOD ⚠️
+
 When you enable the Larger Lookout and it increases in size, any items placed on the floor or attached to the walls may end up embedded inside the new, resized structure.  I strongly recommend that you pick up all floor items and Remove anything attached to the walls before enabling the mod.
 
 
