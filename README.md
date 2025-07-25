@@ -5,7 +5,7 @@ Increase the size, add a second regular sized embedded lookout, and raise the wi
 <img src="https://github.com/moosemeat817/images/blob/main/ShortcutsM.png" width="80%">
 
 
-## Usage
+## Options
 - Enable Larger Lookouts (2x floor space)
 - Enable second regular sized lookout embedded in the larger lookout
 - Raise the windows to get a clear view
