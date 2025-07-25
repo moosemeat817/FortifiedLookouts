@@ -1,5 +1,7 @@
 # Fortified Lookouts
-Increase the size, add a second regular sized embedded lookout, and raise the windows for a clear view for the lookouts in Mystery Lake, Coastal Highway and Bleak Inlet.
+
+⚠️ IMPORTANT WARNING ABOUT ENABLING THE LARGER LOOKOUT MOD ⚠️
+When you enable the Larger Lookout and it increases in size, any items placed on the floor or attached to the walls may end up embedded inside the new, resized structure.  I strongly recommend that you pick up all floor items and Remove anything attached to the walls before enabling the mod.
 
 
 ## Enable Larger Lookouts (2.5x floor space)
@@ -10,6 +12,10 @@ Increase the size, add a second regular sized embedded lookout, and raise the wi
 
 ## Raise the windows to get a clear view
 <img src="https://github.com/moosemeat817/ModListJson/blob/main/FortifiedLookouts_modlist3.png" width="80%">
+
+
+## Requirements
+ModSettings
 
 ## Special Thanks
 The Long Dark Modding Server (Discord)
