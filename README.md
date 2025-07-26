@@ -2,7 +2,7 @@
 
 ⚠️ IMPORTANT WARNING ABOUT ENABLING THE LARGER LOOKOUT MOD ⚠️
 
-When you enable the Larger Lookout and it increases in size, any items placed on the floor or attached to the walls may end up embedded inside the new, resized structure.  I strongly recommend that you pick up all floor items and Remove anything attached to the walls before enabling the mod.
+When you enable the Larger Lookout and it increases in size, any items placed on the floor or attached to the walls may end up embedded inside the new, resized structure.  I strongly recommend that you pick up all items from the floor and remove anything attached to the walls before enabling the mod.  Also, some of the items that were contained within the regular sized lookout may be floating besides the resized/moved lookout.  You should be able to reach everything, but it not you can disable the mod and move things around and then re-enable the mod.
 
 
 ## Enable Larger Lookouts (2.5x floor space)
