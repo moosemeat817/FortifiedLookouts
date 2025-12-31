@@ -1,70 +1,257 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using MelonLoader;
 
 namespace FortifiedLookouts
 {
     internal static class AssetUtils
     {
-        static Dictionary<string, GameObject> cachedPrefabs = new Dictionary<string, GameObject>();
+        public static Dictionary<string, GameObject> cachedPrefabs = new Dictionary<string, GameObject>();
+        static Dictionary<string, bool> loadingPrefabs = new Dictionary<string, bool>();
+
+        public static IEnumerator LoadPrefabAsync(string prefabName, Action<GameObject> onComplete)
+        {
+            if (cachedPrefabs.ContainsKey(prefabName) && cachedPrefabs[prefabName] != null)
+            {
+                onComplete?.Invoke(cachedPrefabs[prefabName]);
+                yield break;
+            }
+
+            if (loadingPrefabs.ContainsKey(prefabName) && loadingPrefabs[prefabName])
+            {
+                while (loadingPrefabs[prefabName])
+                {
+                    yield return null;
+                }
+                onComplete?.Invoke(cachedPrefabs.ContainsKey(prefabName) ? cachedPrefabs[prefabName] : null);
+                yield break;
+            }
+
+            loadingPrefabs[prefabName] = true;
+            yield return MelonCoroutines.Start(GeneratePrefabAsync(prefabName, onComplete));
+            loadingPrefabs[prefabName] = false;
+        }
 
         public static GameObject GetPrefab(string prefabName)
         {
-            if (!cachedPrefabs.ContainsKey(prefabName))
+            if (cachedPrefabs.ContainsKey(prefabName) && cachedPrefabs[prefabName] != null)
             {
-                GeneratePrefab(prefabName);
+                return cachedPrefabs[prefabName];
             }
-            else if (cachedPrefabs.ContainsKey(prefabName) && cachedPrefabs[prefabName] == null)
-            {
-                cachedPrefabs.Remove(prefabName);
-                GeneratePrefab(prefabName);
-            }
-            // Return the prefab reference directly instead of instantiating it
-            return cachedPrefabs[prefabName];
+
+            // For synchronous access, generate and wait
+            GeneratePrefabSync(prefabName);
+
+            return cachedPrefabs.ContainsKey(prefabName) ? cachedPrefabs[prefabName] : null;
         }
 
-        private static void GeneratePrefab(string prefabName)
+        private static IEnumerator GeneratePrefabAsync(string prefabName, Action<GameObject> onComplete)
         {
-            GameObject go = new GameObject();
-            go.name = prefabName;
+            string meshPath = "";
+            string materialPath = "";
+
+            switch (prefabName)
+            {
+                case "OBJ_WoodPlankSingle":
+                    meshPath = "Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx";
+                    materialPath = "Assets/ArtAssets/Materials/Global/GLB_WoodWallRed_F01.mat";
+                    break;
+
+                case "OBJ_WoodPlankSingle2":
+                    meshPath = "Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx";
+                    materialPath = "Assets/ArtAssets/Materials/Global/GLB_WoodWallNatural_M02_Snow.mat";
+                    break;
+
+                case "OBJ_WoodPlankSingle3":
+                    meshPath = "Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx";
+                    materialPath = "Assets/ArtAssets/Materials/Global/GLB_WoodWallNatural_M03.mat";
+                    break;
+
+                case "OBJ_WoodPlankSingle4":
+                    meshPath = "Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx";
+                    materialPath = "Assets/ArtAssets/Materials/Global/GLB_WoodWallNatural_M03_Snow.mat";
+                    break;
+
+                default:
+                    MelonLogger.Warning($"[FortifiedLookouts] Unknown prefab name: {prefabName}");
+                    onComplete?.Invoke(null);
+                    yield break;
+            }
+
+            // Load mesh
+            MelonLogger.Msg($"[FortifiedLookouts] Loading mesh: {meshPath}");
+            AsyncOperationHandle<Mesh> meshHandle = Addressables.LoadAssetAsync<Mesh>(meshPath);
+            yield return meshHandle;
+
+            if (meshHandle.Status != AsyncOperationStatus.Succeeded)
+            {
+                MelonLogger.Error($"[FortifiedLookouts] Failed to load mesh: {meshPath}");
+                if (meshHandle.OperationException != null)
+                    MelonLogger.Error($"[FortifiedLookouts] Exception: {meshHandle.OperationException}");
+                onComplete?.Invoke(null);
+                yield break;
+            }
+
+            Mesh loadedMesh = meshHandle.Result;
+            if (loadedMesh == null)
+            {
+                MelonLogger.Error($"[FortifiedLookouts] Loaded mesh is null: {meshPath}");
+                onComplete?.Invoke(null);
+                yield break;
+            }
+
+            // Load material
+            MelonLogger.Msg($"[FortifiedLookouts] Loading material: {materialPath}");
+            AsyncOperationHandle<Material> materialHandle = Addressables.LoadAssetAsync<Material>(materialPath);
+            yield return materialHandle;
+
+            if (materialHandle.Status != AsyncOperationStatus.Succeeded)
+            {
+                MelonLogger.Error($"[FortifiedLookouts] Failed to load material: {materialPath}");
+                if (materialHandle.OperationException != null)
+                    MelonLogger.Error($"[FortifiedLookouts] Exception: {materialHandle.OperationException}");
+                Addressables.Release(meshHandle);
+                onComplete?.Invoke(null);
+                yield break;
+            }
+
+            Material loadedMaterial = materialHandle.Result;
+            if (loadedMaterial == null)
+            {
+                MelonLogger.Error($"[FortifiedLookouts] Loaded material is null: {materialPath}");
+                Addressables.Release(meshHandle);
+                onComplete?.Invoke(null);
+                yield break;
+            }
+
+            // Create GameObject and assign components
+            GameObject go = null;
+
+            try
+            {
+                go = new GameObject(prefabName);
+
+                MeshFilter mf = go.AddComponent<MeshFilter>();
+                MeshRenderer mr = go.AddComponent<MeshRenderer>();
+                MeshCollider mc = go.AddComponent<MeshCollider>();
+
+                if (mf == null)
+                {
+                    MelonLogger.Error($"[FortifiedLookouts] Failed to create MeshFilter for {prefabName}");
+                    UnityEngine.Object.Destroy(go);
+                    Addressables.Release(meshHandle);
+                    Addressables.Release(materialHandle);
+                    onComplete?.Invoke(null);
+                    yield break;
+                }
+
+                mf.sharedMesh = loadedMesh;
+
+                if (mr != null)
+                {
+                    mr.sharedMaterial = loadedMaterial;
+                }
+
+                if (mc != null)
+                {
+                    mc.sharedMesh = loadedMesh;
+                }
+
+                MelonLogger.Msg($"[FortifiedLookouts] Successfully created prefab: {prefabName}");
+                cachedPrefabs[prefabName] = go;
+                onComplete?.Invoke(go);
+            }
+            catch (System.Exception ex)
+            {
+                MelonLogger.Error($"[FortifiedLookouts] Exception creating prefab {prefabName}: {ex.Message}");
+                MelonLogger.Error($"[FortifiedLookouts] Stack trace: {ex.StackTrace}");
+                if (go != null)
+                {
+                    UnityEngine.Object.Destroy(go);
+                }
+                Addressables.Release(meshHandle);
+                Addressables.Release(materialHandle);
+                onComplete?.Invoke(null);
+            }
+        }
+
+        private static void GeneratePrefabSync(string prefabName)
+        {
+            if (cachedPrefabs.ContainsKey(prefabName) && cachedPrefabs[prefabName] != null)
+                return;
+
+            GameObject go = new GameObject(prefabName);
 
             MeshFilter meshFilter = go.AddComponent<MeshFilter>();
             MeshRenderer meshRenderer = go.AddComponent<MeshRenderer>();
             MeshCollider meshCollider = go.AddComponent<MeshCollider>();
 
-            switch (prefabName)
+            try
             {
-                case "OBJ_WoodPlankSingle":
-                    meshFilter.sharedMesh = Addressables.LoadAssetAsync<Mesh>("Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx").WaitForCompletion();
-                    meshRenderer.sharedMaterial = Addressables.LoadAssetAsync<Material>("Assets/ArtAssets/Materials/Global/GLB_WoodWallRed_F01.mat").WaitForCompletion();
-                    meshCollider.sharedMesh = meshFilter.sharedMesh;
-                    break;
+                Mesh loadedMesh = null;
+                Material loadedMaterial = null;
 
-                case "OBJ_WoodPlankSingle2":
-                    meshFilter.sharedMesh = Addressables.LoadAssetAsync<Mesh>("Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx").WaitForCompletion();
-                    meshRenderer.sharedMaterial = Addressables.LoadAssetAsync<Material>("Assets/ArtAssets/Materials/Global/GLB_WoodWallNatural_M02_Snow.mat").WaitForCompletion();
-                    meshCollider.sharedMesh = meshFilter.sharedMesh;
-                    break;
+                switch (prefabName)
+                {
+                    case "OBJ_WoodPlankSingle":
+                        loadedMesh = Addressables.LoadAssetAsync<Mesh>("Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx").WaitForCompletion();
+                        loadedMaterial = Addressables.LoadAssetAsync<Material>("Assets/ArtAssets/Materials/Global/GLB_WoodWallRed_F01.mat").WaitForCompletion();
+                        break;
 
-                case "OBJ_WoodPlankSingle3":
-                    meshFilter.sharedMesh = Addressables.LoadAssetAsync<Mesh>("Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx").WaitForCompletion();
-                    meshRenderer.sharedMaterial = Addressables.LoadAssetAsync<Material>("Assets/ArtAssets/Materials/Global/GLB_WoodWallNatural_M03.mat").WaitForCompletion();
-                    meshCollider.sharedMesh = meshFilter.sharedMesh;
-                    break;
+                    case "OBJ_WoodPlankSingle2":
+                        loadedMesh = Addressables.LoadAssetAsync<Mesh>("Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx").WaitForCompletion();
+                        loadedMaterial = Addressables.LoadAssetAsync<Material>("Assets/ArtAssets/Materials/Global/GLB_WoodWallNatural_M02_Snow.mat").WaitForCompletion();
+                        break;
 
-                case "OBJ_WoodPlankSingle4":
-                    meshFilter.sharedMesh = Addressables.LoadAssetAsync<Mesh>("Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx").WaitForCompletion();
-                    meshRenderer.sharedMaterial = Addressables.LoadAssetAsync<Material>("Assets/ArtAssets/Materials/Global/GLB_WoodWallNatural_M03_Snow.mat").WaitForCompletion();
-                    meshCollider.sharedMesh = meshFilter.sharedMesh;
-                    break;
+                    case "OBJ_WoodPlankSingle3":
+                        loadedMesh = Addressables.LoadAssetAsync<Mesh>("Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx").WaitForCompletion();
+                        loadedMaterial = Addressables.LoadAssetAsync<Material>("Assets/ArtAssets/Materials/Global/GLB_WoodWallNatural_M03.mat").WaitForCompletion();
+                        break;
 
+                    case "OBJ_WoodPlankSingle4":
+                        loadedMesh = Addressables.LoadAssetAsync<Mesh>("Assets/ArtAssets/Env/Structures/STR_CoastalHouseG/OBJ_WoodPlankSingle.fbx").WaitForCompletion();
+                        loadedMaterial = Addressables.LoadAssetAsync<Material>("Assets/ArtAssets/Materials/Global/GLB_WoodWallNatural_M03_Snow.mat").WaitForCompletion();
+                        break;
+
+                    default:
+                        MelonLogger.Warning($"[FortifiedLookouts] Unknown prefab: {prefabName}");
+                        UnityEngine.Object.Destroy(go);
+                        return;
+                }
+
+                if (loadedMesh == null)
+                {
+                    MelonLogger.Error($"[FortifiedLookouts] Failed to load mesh for {prefabName}");
+                    UnityEngine.Object.Destroy(go);
+                    return;
+                }
+
+                if (loadedMaterial == null)
+                {
+                    MelonLogger.Error($"[FortifiedLookouts] Failed to load material for {prefabName}");
+                    UnityEngine.Object.Destroy(go);
+                    return;
+                }
+
+                meshFilter.sharedMesh = loadedMesh;
+                meshRenderer.sharedMaterial = loadedMaterial;
+                meshCollider.sharedMesh = meshFilter.sharedMesh;
+
+                cachedPrefabs[prefabName] = go;
+                MelonLogger.Msg($"[FortifiedLookouts] Cached prefab: {prefabName}");
             }
-
-            cachedPrefabs.Add(prefabName, go);
+            catch (Exception ex)
+            {
+                MelonLogger.Error($"[FortifiedLookouts] Exception generating prefab {prefabName}: {ex.Message}");
+                UnityEngine.Object.Destroy(go);
+            }
         }
     }
 }
