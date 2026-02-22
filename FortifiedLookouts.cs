@@ -33,13 +33,13 @@ namespace FortifiedLookouts
                     bool isIndoorScene = GameManager.GetWeatherComponent().IsIndoorScene();
                     Vector3 playerPos = GameManager.GetPlayerTransform().position;
 
-                    MelonLogger.Msg($"[FL Debug] Scene: {currentScene} | IsIndoorScene: {isIndoorScene} | Player Pos: {playerPos}");
+                    //MelonLogger.Msg($"[FL Debug] Scene: {currentScene} | IsIndoorScene: {isIndoorScene} | Player Pos: {playerPos}");
                     CheckPlayerProximityToLookouts(currentScene, playerPos);
                 }
             }
             catch (System.Exception ex)
             {
-                MelonLogger.Warning($"[FL Debug] Error in indoor detection debug: {ex.Message}");
+                //MelonLogger.Warning($"[FL Debug] Error in indoor detection debug: {ex.Message}");
             }
         }
 
@@ -54,7 +54,7 @@ namespace FortifiedLookouts
                     float lakeDist = Vector3.Distance(playerPos, lakeIndoorCenter);
                     if (lakeDist < proximityThreshold)
                     {
-                        MelonLogger.Msg($"[FL Debug] Near Lake Lookout IndoorSpace | Distance: {lakeDist:F2}");
+                        //MelonLogger.Msg($"[FL Debug] Near Lake Lookout IndoorSpace | Distance: {lakeDist:F2}");
                     }
                     break;
 
@@ -63,7 +63,7 @@ namespace FortifiedLookouts
                     float canneryDist = Vector3.Distance(playerPos, canneryIndoorCenter);
                     if (canneryDist < proximityThreshold)
                     {
-                        MelonLogger.Msg($"[FL Debug] Near Cannery Lookout IndoorSpace | Distance: {canneryDist:F2}");
+                        //MelonLogger.Msg($"[FL Debug] Near Cannery Lookout IndoorSpace | Distance: {canneryDist:F2}");
                     }
                     break;
 
@@ -72,7 +72,7 @@ namespace FortifiedLookouts
                     float coastalDist = Vector3.Distance(playerPos, coastalIndoorCenter);
                     if (coastalDist < proximityThreshold)
                     {
-                        MelonLogger.Msg($"[FL Debug] Near Coastal Lookout IndoorSpace | Distance: {coastalDist:F2}");
+                        //MelonLogger.Msg($"[FL Debug] Near Coastal Lookout IndoorSpace | Distance: {coastalDist:F2}");
                     }
                     break;
             }
@@ -130,21 +130,21 @@ namespace FortifiedLookouts
             if (ShouldSkipScene(sceneName))
                 return;
 
-            MelonLogger.Msg($"[FL Debug] Scene Initialized: {sceneName}");
+            //MelonLogger.Msg($"[FL Debug] Scene Initialized: {sceneName}");
 
             if (sceneName == "LakeRegion" && Settings.options.mysteryLookout)
             {
-                MelonLogger.Msg("[FL Debug] Processing LakeRegion initialization");
+                //MelonLogger.Msg("[FL Debug] Processing LakeRegion initialization");
                 Utilities.DisableChildrenByNameContains("Art/Structures/STRSPAWN_ForesrtyLookoutLake_Prefab2", "icicle");
                 Utilities.DisableChildrenByIndex("Scene Collision", new int[] { 0, 1, 2, 4, 5 });
             }
             else if (sceneName == "CanneryRegion" && Settings.options.bleakLookout)
             {
-                MelonLogger.Msg("[FL Debug] Processing CanneryRegion initialization");
+                //MelonLogger.Msg("[FL Debug] Processing CanneryRegion initialization");
             }
             else if (sceneName == "CoastalRegion" && Settings.options.coastalLookout)
             {
-                MelonLogger.Msg("[FL Debug] Processing CoastalRegion initialization");
+                //MelonLogger.Msg("[FL Debug] Processing CoastalRegion initialization");
             }
         }
 
@@ -153,7 +153,7 @@ namespace FortifiedLookouts
             if (ShouldSkipScene(sceneName))
                 return;
 
-            MelonLogger.Msg($"[FL Debug] Scene Loaded: {sceneName}");
+            //MelonLogger.Msg($"[FL Debug] Scene Loaded: {sceneName}");
 
             if (sceneName == "LakeRegion" && Settings.options.mysteryLookout)
             {
@@ -173,7 +173,7 @@ namespace FortifiedLookouts
 
         private void ProcessLakeRegion()
         {
-            MelonLogger.Msg("[FL Debug] Starting LakeRegion processing");
+            //MelonLogger.Msg("[FL Debug] Starting LakeRegion processing");
 
             var windKiller = FindGameObjectSafely("Design/Scripting/ParticleKillers/ShelteredWindKiller");
             SetTransformSafely(windKiller, new Vector3(785.4221f, 206.6555f, 966.0353f), new Vector3(-0, 0f, 0));
@@ -195,12 +195,25 @@ namespace FortifiedLookouts
             var indoorSpace = FindGameObjectSafely("Art/Structures/STRSPAWN_ForesrtyLookoutLake_Prefab2/Tech/IndoorSpace");
             SetScaleSafely(indoorSpace, new Vector3(11.1812f, 3.7477f, 8.3198f));
             SetTransformSafely(indoorSpace, new Vector3(787.1846f, 214.1074f, 967.0839f), new Vector3(0, 6.3093f, 0));
-            MelonLogger.Msg($"[FL Debug] Modified Lake IndoorSpace - Scale: {new Vector3(11.1812f, 3.7477f, 8.3198f)}, Position: {new Vector3(787.1846f, 214.1074f, 967.0839f)}");
+            //MelonLogger.Msg($"[FL Debug] Modified Lake IndoorSpace - Scale: {new Vector3(11.1812f, 3.7477f, 8.3198f)}, Position: {new Vector3(787.1846f, 214.1074f, 967.0839f)}");
+
+
+
+            var OBsOccZoneHeavy = FindGameObjectSafely("Art/Structures/STRSPAWN_ForesrtyLookoutLake_Prefab2/Tech/AUDIO_OBsOccZoneHeavy");
+            SetScaleSafely(OBsOccZoneHeavy, new Vector3(11.1812f, 3.7477f, 8.3198f));
+            SetTransformSafely(OBsOccZoneHeavy, new Vector3(787.1846f, 214.1074f, 967.0839f), new Vector3(0, 6.3093f, 0));
+
+            var ReverbLookout = FindGameObjectSafely("Art/Structures/STRSPAWN_ForesrtyLookoutLake_Prefab2/Tech/AUDIO_ReverbLookout");
+            SetScaleSafely(ReverbLookout, new Vector3(11.1812f, 3.7477f, 8.3198f));
+            SetTransformSafely(ReverbLookout, new Vector3(787.1846f, 214.1074f, 967.0839f), new Vector3(0, 6.3093f, 0));
+
+
+
 
             var interiorTemp = FindGameObjectSafely("Design/Scripting/TRIGGER_InteriorTemperature");
             SetScaleSafely(interiorTemp, new Vector3(12.7968f, 3.7477f, 10.102f));
             SetTransformSafely(interiorTemp, new Vector3(788.86f, 214.53f, 966.86f), new Vector3(0, 6.3093f, 0));
-            MelonLogger.Msg($"[FL Debug] Modified Lake InteriorTemperature - Scale: {new Vector3(12.7968f, 3.7477f, 10.102f)}, Position: {new Vector3(788.86f, 214.53f, 966.86f)}");
+            //MelonLogger.Msg($"[FL Debug] Modified Lake InteriorTemperature - Scale: {new Vector3(12.7968f, 3.7477f, 10.102f)}, Position: {new Vector3(788.86f, 214.53f, 966.86f)}");
 
             var tempIncrease = FindGameObjectSafely("Design/Scripting/TRIGGER_TemperatureIncrease");
             SetScaleSafely(tempIncrease, new Vector3(7.985f, 3.7477f, 9.291f));
@@ -242,12 +255,12 @@ namespace FortifiedLookouts
                 MelonCoroutines.Start(PlacementManager.PlaceAssetsAsync());
             }
 
-            MelonLogger.Msg("[FL Debug] Completed LakeRegion processing");
+            //MelonLogger.Msg("[FL Debug] Completed LakeRegion processing");
         }
 
         private void ProcessCanneryRegion()
         {
-            MelonLogger.Msg("[FL Debug] Starting CanneryRegion processing");
+            //MelonLogger.Msg("[FL Debug] Starting CanneryRegion processing");
 
             var lookoutBase = FindGameObjectSafely("Art/Structures/Lookout/STRSPAWN_ForestryLookoutCannery_Prefab/STR_ForestryLookoutLakeBase_Prefab");
             SetScaleSafely(lookoutBase, new Vector3(1.785f, 1.07f, 1.4f));
@@ -260,7 +273,22 @@ namespace FortifiedLookouts
             var indoorSpace = FindGameObjectSafely("Art/Structures/Lookout/STRSPAWN_ForestryLookoutCannery_Prefab/Tech/IndoorSpace");
             SetScaleSafely(indoorSpace, new Vector3(9.7363f, 4.2477f, 8.8658f));
             SetTransformSafely(indoorSpace, new Vector3(297.739f, 238.96f, 352.8523f), new Vector3(0, 105.7286f, 0));
-            MelonLogger.Msg($"[FL Debug] Modified Cannery IndoorSpace - Scale: {new Vector3(9.7363f, 4.2477f, 8.8658f)}, Position: {new Vector3(297.739f, 240.1474f, 352.8523f)}");
+            //MelonLogger.Msg($"[FL Debug] Modified Cannery IndoorSpace - Scale: {new Vector3(9.7363f, 4.2477f, 8.8658f)}, Position: {new Vector3(297.739f, 240.1474f, 352.8523f)}");
+
+
+
+            var OBsOccZoneHeavy = FindGameObjectSafely("Art/Structures/Lookout/STRSPAWN_ForestryLookoutCannery_Prefab/Tech/AUDIO_OBsOccZoneHeavy");
+            SetScaleSafely(OBsOccZoneHeavy, new Vector3(9.7363f, 4.2477f, 8.8658f));
+            SetTransformSafely(OBsOccZoneHeavy, new Vector3(297.739f, 238.96f, 352.8523f), new Vector3(0, 105.7286f, 0));
+
+
+            var AUDIO_ReverbLookout = FindGameObjectSafely("Art/Structures/Lookout/STRSPAWN_ForestryLookoutCannery_Prefab/Tech/AUDIO_ReverbLookout");
+            SetScaleSafely(AUDIO_ReverbLookout, new Vector3(9.7363f, 4.2477f, 8.8658f));
+            SetTransformSafely(AUDIO_ReverbLookout, new Vector3(297.739f, 238.96f, 352.8523f), new Vector3(0, 105.7286f, 0));
+
+
+
+
 
             var particleKiller = FindGameObjectSafely("Art/Structures/Lookout/STRSPAWN_ForestryLookoutCannery_Prefab/Tech/ParticleKiller");
             SetScaleSafely(particleKiller, new Vector3(14.027f, 5f, 10.0791f));
@@ -281,12 +309,12 @@ namespace FortifiedLookouts
                 MelonCoroutines.Start(PlacementManager.PlaceAssetsAsync());
             }
 
-            MelonLogger.Msg("[FL Debug] Completed CanneryRegion processing");
+            //MelonLogger.Msg("[FL Debug] Completed CanneryRegion processing");
         }
 
         private void ProcessCoastalRegion()
         {
-            MelonLogger.Msg("[FL Debug] Starting CoastalRegion processing");
+            //MelonLogger.Msg("[FL Debug] Starting CoastalRegion processing");
 
             var baseRocks = FindGameObjectSafely("Art/Terrain_Group/TRN_Rock_Group/TRN_RockMedGroupB_Win_Base_Prefab");
             SetScaleSafely(baseRocks, new Vector3(1.3f, 1.1f, 1f));
@@ -309,13 +337,34 @@ namespace FortifiedLookouts
             SetScaleSafely(hinge, new Vector3(1, 1.03f, 1.4f));
             SetTransformSafely(hinge, new Vector3(346.988f, 204.4127f, 1162.364f), new Vector3(-0, 11.1645f, 180));
 
+
+
+
+
+
             var indoorSpace = FindGameObjectSafely("Art/Structure_Group/STRSPAWN_ForestryLookoutCoastal_Prefab/Tech/IndoorSpace");
             SetScaleSafely(indoorSpace, new Vector3(11.667f, 3.7477f, 8.072f));
             SetTransformSafely(indoorSpace, new Vector3(351.4609f, 204.3371f, 1157.769f), new Vector3(0, 191.1829f, 0));
-            MelonLogger.Msg($"[FL Debug] Modified Coastal IndoorSpace - Scale: {new Vector3(11.667f, 3.7477f, 8.072f)}, Position: {new Vector3(351.4609f, 204.3371f, 1157.769f)}");
+            //MelonLogger.Msg($"[FL Debug] Modified Coastal IndoorSpace - Scale: {new Vector3(11.667f, 3.7477f, 8.072f)}, Position: {new Vector3(351.4609f, 204.3371f, 1157.769f)}");
 
             var particleKiller = FindGameObjectSafely("Art/Structure_Group/STRSPAWN_ForestryLookoutCoastal_Prefab/Tech/ParticleKiller");
-            SetScaleSafely(particleKiller, new Vector3(18.972f, 4.5f, 7.2791f));
+            SetScaleSafely(particleKiller, new Vector3(21.972f, 4.5f, 7.2791f));
+            //SetTransformSafely(particleKiller, new Vector3(357.5925f, 204.3371f, 1157.769f), new Vector3(0, 191.1829f, 0));
+
+
+            // 356.8118 204.8002 1157.869 / 6.3738 3.7477 6.2706
+
+
+            var OBsOccZoneHeavy = FindGameObjectSafely("Art/Structure_Group/STRSPAWN_ForestryLookoutCoastal_Prefab/Tech/AUDIO_OBsOccZoneHeavy");
+            SetScaleSafely(OBsOccZoneHeavy, new Vector3(11.667f, 3.7477f, 8.072f));
+            SetTransformSafely(OBsOccZoneHeavy, new Vector3(351.4609f, 204.3371f, 1157.769f), new Vector3(0, 191.1829f, 0));
+
+            var ReverbLookout = FindGameObjectSafely("Art/Structure_Group/STRSPAWN_ForestryLookoutCoastal_Prefab/Tech/AUDIO_ReverbLookout");
+            SetScaleSafely(ReverbLookout, new Vector3(11.667f, 3.7477f, 8.072f));
+            SetTransformSafely(ReverbLookout, new Vector3(351.4609f, 204.3371f, 1157.769f), new Vector3(0, 191.1829f, 0));
+
+
+
 
             if (Settings.options.coastalWindows)
             {
@@ -329,7 +378,7 @@ namespace FortifiedLookouts
                 MelonCoroutines.Start(PlacementManager.PlaceAssetsAsync());
             }
 
-            MelonLogger.Msg("[FL Debug] Completed CoastalRegion processing");
+            //MelonLogger.Msg("[FL Debug] Completed CoastalRegion processing");
         }
     }
 }
